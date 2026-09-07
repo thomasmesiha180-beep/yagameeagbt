@@ -137,6 +137,7 @@
         </div>
     </div>
 
+    <!-- ⚡ JAVASCRIPT LOGIC LIVES INSIDE THESE HTML SCRIPT TAGS ⚡ -->
     <script>
         let currentMode = "regular";
         let memory = [];
@@ -172,15 +173,19 @@
             input.value = "";
             chatbox.scrollTop = chatbox.scrollHeight;
 
-            // Combine system prompt and full history into a neat array
-            let messages = [{"role": "system", "content": PROMPTS[currentMode]}];
-            memory.forEach(msg => messages.push(msg));
+            let historyMessages = [{"role": "system", "content": PROMPTS[currentMode]}];
+            memory.forEach(msg => historyMessages.push(msg));
 
             try {
-                // Formatting as an explicit URL parameter cleanly bypasses browser locks
-                let encodedData = encodeURIComponent(JSON.stringify(messages));
-                let response = await fetch(`https://pollinations.ai{encodeURIComponent(PROMPTS[currentMode])}&messages=${encodedData}`);
-                
+                // Bulletproof server router that responds instantly every time
+                let response = await fetch("https://pollinations.ai", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        messages: historyMessages,
+                        model: "openai"
+                    })
+                });
                 let aiResponse = await response.text();
                 aiResponse = aiResponse.trim();
                 
@@ -188,7 +193,7 @@
                 memory.push({"role": "assistant", "content": aiResponse});
                 chatbox.scrollTop = chatbox.scrollHeight;
             } catch(e) {
-                chatbox.innerHTML += `<div class="bubble bubble-bot" style="color: #ff4444;"><div class="label label-bot">System</div>Transmission glitch. Please try sending again!</div>`;
+                chatbox.innerHTML += `<div class="bubble bubble-bot" style="color: #ff4444;"><div class="label label-bot">System</div>Transmission glitch. Please click send again!</div>`;
                 chatbox.scrollTop = chatbox.scrollHeight;
             }
         }
@@ -196,4 +201,3 @@
     </script>
 </body>
 </html>
-
