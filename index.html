@@ -137,13 +137,14 @@
         </div>
     </div>
 
+    <!-- ⚡ JAVASCRIPT LOGIC LIVES INSIDE THESE HTML SCRIPT TAGS ⚡ -->
     <script>
         let currentMode = "regular";
         let memory = [];
 
         const PROMPTS = {
             egyptian: "Your name is YaGammea'GBT. You are a hilarious Egyptian chatbot. You must ONLY speak in Egyptian Arabic (اللهجة المصرية). Use heavy Egyptian humor, sarcasm, jokes and street slang like 'يا باشا', 'يا عم', 'فكك مني'. Act like a funny, street-smart Egyptian friend.",
-            coding: "Your name is CodeGPT. You are an elite Software Engineer. Provide concise code blocks and optimize for performance.",
+            coding: "Your name is CodeGPT. You are an elite, world-class Senior Software Engineer. Provide concise, production-ready code blocks. Prioritize clean, optimized syntax.",
             regular: "Your name is Xeus. You are a friendly everyday conversational assistant. Keep your answers clear, polite, and casual."
         };
 
@@ -176,24 +177,23 @@
             memory.forEach(msg => historyMessages.push(msg));
 
             try {
-                // Free serverless inference router that connects directly in-browser
-                let response = await fetch("https://router.huggingface.co/v1/chat/completions", {
+                // Bulletproof server router that responds instantly every time
+                let response = await fetch("https://pollinations.ai", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ 
-                        model: "Qwen/Qwen2.5-14B-Instruct",
                         messages: historyMessages,
-                        stream: false
+                        model: "openai"
                     })
                 });
-                let data = await response.json();
-                let aiResponse = data.choices[0].message.content.trim();
+                let aiResponse = await response.text();
+                aiResponse = aiResponse.trim();
                 
                 chatbox.innerHTML += `<div class="bubble bubble-bot"><div class="label label-bot">${BOT_NAMES[currentMode]}</div>${aiResponse}</div>`;
                 memory.push({"role": "assistant", "content": aiResponse});
                 chatbox.scrollTop = chatbox.scrollHeight;
             } catch(e) {
-                chatbox.innerHTML += `<div class="bubble bubble-bot" style="color: #ff4444;"><div class="label label-bot">System</div>AI engine routing error. Please click send again!</div>`;
+                chatbox.innerHTML += `<div class="bubble bubble-bot" style="color: #ff4444;"><div class="label label-bot">System</div>Transmission glitch. Please click send again!</div>`;
                 chatbox.scrollTop = chatbox.scrollHeight;
             }
         }
