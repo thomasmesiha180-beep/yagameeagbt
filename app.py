@@ -456,28 +456,31 @@ if user_input := st.chat_input(
                         "Run `pip install ddgs` to enable it."
                     )
 
-            # ------------------------------------------------
-            # Ollama
+                        # ------------------------------------------------
+            # Groq
             # ------------------------------------------------
 
             stream = client.chat.completions.create(
-    model="openai/gpt-oss-20b",
-    messages=ollama_messages,
-    stream=True,
-    include_reasoning=False
-)
+                model="openai/gpt-oss-20b",
+                messages=ollama_messages,
+                stream=True,
+                include_reasoning=False
+            )
 
             # Stream response token-by-token.
             for chunk in stream:
 
-    content = chunk.choices[0].delta.content or ""
+                content = chunk.choices[0].delta.content or ""
 
-    full_response += content
+                full_response += content
 
-    response_placeholder.markdown(
-        full_response + "▊"
-    )
-)
+                response_placeholder.markdown(
+                    full_response + "▊"
+                )
+
+            response_placeholder.markdown(
+                full_response
+            )
 
             # Save assistant response.
             st.session_state.messages.append({
