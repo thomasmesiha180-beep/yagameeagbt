@@ -2,9 +2,9 @@ import json
 import os
 import re
 
-import ollama
+from groq import Groq
 import streamlit as st
-
+client: Groq(api_key=st.secrets["GROQ_API_KEY"]
 
 # ============================================================
 # 1. Persistent Chat History
@@ -460,26 +460,24 @@ if user_input := st.chat_input(
             # Ollama
             # ------------------------------------------------
 
-            stream = ollama.chat(
-                model="llama3.2:3b",
-                messages=ollama_messages,
-                stream=True
-            )
+            stream = client.chat.completions.create(
+    model="openai/gpt-oss-20b",
+    messages=ollama_messages,
+    stream=True,
+    include_reasoning=False
+)
 
             # Stream response token-by-token.
             for chunk in stream:
 
-                content = chunk["message"]["content"]
+    content = chunk.choices[0].delta.content or ""
 
-                full_response += content
+    full_response += content
 
-                response_placeholder.markdown(
-                    full_response + "▊"
-                )
-
-            response_placeholder.markdown(
-                full_response
-            )
+    response_placeholder.markdown(
+        full_response + "▊"
+    )
+)
 
             # Save assistant response.
             st.session_state.messages.append({
@@ -496,5 +494,7 @@ if user_input := st.chat_input(
         except Exception as e:
 
             st.error(
-                f"Error communicating with Ollama: {e}"
+                f"Error communicating with the AI: {e}"
             )
+
+
