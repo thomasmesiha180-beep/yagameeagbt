@@ -4,7 +4,7 @@ import re
 
 from groq import Groq
 import streamlit as st
-client: Groq(api_key=st.secrets["GROQ_API_KEY"]
+client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 # ============================================================
 # 1. Persistent Chat History
