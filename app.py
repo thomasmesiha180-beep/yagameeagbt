@@ -175,19 +175,20 @@ def search_web(query):
                 max_results=5
             ))
 
-            st.write("===== WEB SEARCH RESULTS =====")
-st.write("QUERY:", query)
+        st.write("===== WEB SEARCH RESULTS =====")
+        st.write("QUERY:", query)
 
-for result in results:
-    st.write("TITLE:", result.get("title", ""))
-    st.write("URL:", result.get("href", ""))
-    st.write("BODY:", result.get("body", ""))
-    st.write("------------------------------")
-            return results
+        for result in results:
+            st.write("TITLE:", result.get("title", ""))
+            st.write("URL:", result.get("href", ""))
+            st.write("BODY:", result.get("body", ""))
+            st.write("------------------------------")
+
+        return results
+
     except Exception as e:
-        print("WEB SEARCH ERROR:", e)
+        st.write("WEB SEARCH ERROR:", e)
         return []
-
 
 def build_web_context(results):
     """Turn search results into context the AI can understand."""
