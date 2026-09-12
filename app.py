@@ -175,17 +175,15 @@ def search_web(query):
                 max_results=5
             ))
 
-            print("\n===== WEB SEARCH RESULTS =====")
-            print("QUERY:", query)
+            st.write("===== WEB SEARCH RESULTS =====")
+st.write("QUERY:", query)
 
-            for result in results:
-                print("TITLE:", result.get("title", ""))
-                print("URL:", result.get("href", ""))
-                print("BODY:", result.get("body", ""))
-                print("------------------------------")
-
+for result in results:
+    st.write("TITLE:", result.get("title", ""))
+    st.write("URL:", result.get("href", ""))
+    st.write("BODY:", result.get("body", ""))
+    st.write("------------------------------")
             return results
-
     except Exception as e:
         print("WEB SEARCH ERROR:", e)
         return []
