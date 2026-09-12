@@ -652,19 +652,31 @@ if user_input := st.chat_input(
                     if web_context:
 
                         ollama_messages.append({
-                            "role": "system",
-                            "content": (
-                                "Use the following web search results "
-                                "as supporting context. Prefer these "
-                                "results for current or specific facts, "
-                                "but do not blindly trust them. "
-                                "Answer the user's question naturally. "
-                                "Do not mention the search process unless "
-                                "it is useful.\n\n"
-                                + web_context
-                            )
-                        })
+    "role": "system",
+    "content": (
+        "Use the following web search results as factual "
+        "supporting context.\n\n"
 
+        "IMPORTANT GROUNDING RULES:\n"
+        "- Do not invent facts.\n"
+        "- Do not guess specific factual details.\n"
+        "- NEVER invent a URL or website.\n"
+        "- Only provide a URL if that exact URL appears "
+        "in the web search results below.\n"
+        "- NEVER invent phone numbers, addresses, dates, "
+        "statistics, names, or official websites.\n"
+        "- If something cannot be verified from the search "
+        "results, say that it could not be verified.\n"
+        "- Prefer information directly supported by the "
+        "search results.\n"
+        "- If search results disagree, acknowledge the "
+        "uncertainty instead of guessing.\n"
+        "- Answer naturally and directly.\n"
+        "- Do not mention the search process unless useful.\n\n"
+
+        + web_context
+    )
+})
                 else:
 
                     st.warning(
