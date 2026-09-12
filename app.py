@@ -4,7 +4,9 @@ import re
 
 from groq import Groq
 import streamlit as st
+
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+
 
 # ============================================================
 # 1. Persistent Chat History
@@ -52,10 +54,12 @@ def load_history_for_persona(persona):
 def save_message(persona, role, message):
     data = load_all_history()
     data.setdefault(persona, [])
+
     data[persona].append({
         "role": role,
         "content": message
     })
+
     save_all_history(data)
 
 
@@ -72,45 +76,46 @@ PERSONAS = {
     ),
 
     "YaGammeGBT 🇪🇬": (
-    "You are YaGammeaGBT, a hilarious, quick-witted Egyptian jokester "
-    "and street-smart AI comedian. Your MAIN PRIORITY is to entertain "
-    "the user with Egyptian humor, sarcasm, playful banter, and funny "
-    "reactions. Be energetic, chaotic, and naturally funny. "
+        "You are YaGammeaGBT, a hilarious, quick-witted Egyptian jokester "
+        "and street-smart AI comedian. Your MAIN PRIORITY is to entertain "
+        "the user with Egyptian humor, sarcasm, playful banter, and funny "
+        "reactions. Be energetic, chaotic, and naturally funny. "
 
-    "Speak naturally using a fluid mix of Egyptian Arabic, English, "
-    "and Franco-Arab (Arabizi). Use Egyptian slang when appropriate, "
-    "but do not force Arabizi into every sentence. "
+        "Speak naturally using a fluid mix of Egyptian Arabic, English, "
+        "and Franco-Arab (Arabizi). Use Egyptian slang when appropriate, "
+        "but do not force Arabizi into every sentence. "
 
-    "IMPORTANT EGYPTIAN CONTEXT: "
-    "'El Haram' or 'Al Haram' can refer to the El Haram area in Giza, "
-    "near the Giza Pyramids. If the user says something like "
-    "'yasta fein al haram?' or 'fein el haram?', understand that they "
-    "are most likely asking where the El Haram area is, unless the "
-    "conversation clearly indicates another meaning. "
-    "'fein el kahera?' means 'where is Cairo?' "
-    "'3ayez aroo7 el madrasa' means 'I want to go to school.' "
+        "IMPORTANT EGYPTIAN CONTEXT: "
+        "'El Haram' or 'Al Haram' can refer to the El Haram area in Giza, "
+        "near the Giza Pyramids. If the user says something like "
+        "'yasta fein al haram?' or 'fein el haram?', understand that they "
+        "are most likely asking where the El Haram area is, unless the "
+        "conversation clearly indicates another meaning. "
+        "'fein el kahera?' means 'where is Cairo?' "
+        "'3ayez aroo7 el madrasa' means 'I want to go to school.' "
 
-    "Always understand what the user actually said before responding. "
-    "The joke should support the conversation, not replace the answer. "
-    "If the user asks a question, answer it while keeping the funny "
-    "Egyptian personality. "
+        "Always understand what the user actually said before responding. "
+        "The joke should support the conversation, not replace the answer. "
+        "If the user asks a question, answer it while keeping the funny "
+        "Egyptian personality. "
 
-    "Do not give random or nonsensical answers just to sound funny. "
-    "Do not randomly mention food, places, or unrelated topics. "
-    "Do not repeat the same joke, phrase, or topic over and over. "
+        "Do not give random or nonsensical answers just to sound funny. "
+        "Do not randomly mention food, places, or unrelated topics. "
+        "Do not repeat the same joke, phrase, or topic over and over. "
 
-    "If the user jokes, joke back. If the user asks something simple, "
-    "give a simple funny answer. If the user says goodbye, give a short "
-    "funny Egyptian-style goodbye. "
+        "If the user jokes, joke back. If the user asks something simple, "
+        "give a simple funny answer. If the user says goodbye, give a short "
+        "funny Egyptian-style goodbye. "
 
-    "Never become overly formal, robotic, or corporate. You are an "
-    "Egyptian friend with comedian energy, not a boring assistant."
-    "Keep location descriptions accurate and natural. "
-    "When explaining El Haram, say it is an area in Giza near the Giza Pyramids. "
-    "Do not invent directions, landmarks, or phrases such as "
-    "'the other side of the pyramid' unless the user specifically provides "
-    "that information."
-),
+        "Never become overly formal, robotic, or corporate. You are an "
+        "Egyptian friend with comedian energy, not a boring assistant. "
+
+        "Keep location descriptions accurate and natural. "
+        "When explaining El Haram, say it is an area in Giza near the Giza Pyramids. "
+        "Do not invent directions, landmarks, or phrases such as "
+        "'the other side of the pyramid' unless the user specifically provides "
+        "that information."
+    ),
 
     "CodeGBT 💻": (
         "You are CodeGBT, a world-class Principal Software Engineer and absolute "
@@ -123,17 +128,18 @@ PERSONAS = {
     )
 }
 
+
 # ============================================================
 # 3. Selective Web Search
 # ============================================================
 
 try:
     from ddgs import DDGS
-
     WEB_SEARCH_AVAILABLE = True
-
 except ImportError:
     WEB_SEARCH_AVAILABLE = False
+
+
 def should_search_web(query):
     """
     Decide whether a web search is actually useful.
@@ -156,61 +162,11 @@ def should_search_web(query):
     q = query.lower().strip()
 
     # ------------------------------------------------
-    # 1. Very short messages are almost never worth
-    #    sending to the search engine.
+    # 1. Very short messages
     # ------------------------------------------------
 
     if len(q.split()) < 3:
-        return False 
-def search_web(query):
-    """Search the web and return a small set of useful results."""
-
-    if not WEB_SEARCH_AVAILABLE:
-        return []
-
-    try:
-        with DDGS() as ddgs:
-            results = list(ddgs.text(
-                query,
-                max_results=5
-            ))
-
-        st.write("===== WEB SEARCH RESULTS =====")
-        st.write("QUERY:", query)
-
-        for result in results:
-            st.write("TITLE:", result.get("title", ""))
-            st.write("URL:", result.get("href", ""))
-            st.write("BODY:", result.get("body", ""))
-            st.write("------------------------------")
-
-        return results
-
-    except Exception as e:
-        st.write("WEB SEARCH ERROR:", e)
-        return []
-
-    def build_web_context(results):
-        """Turn search results into context the AI can understand."""
-
-        if not results:
-            return ""
-
-        context_parts = []
-
-        for result in results:
-            title = result.get("title", "")
-            body = result.get("body", "")
-            url = result.get("href", "")
-
-            if title or body:
-                context_parts.append(
-                    f"Title: {title}\n"
-                    f"Summary: {body}\n"
-                    f"URL: {url}"
-                )
-
-        return "\n\n".join(context_parts)
+        return False
 
     # ------------------------------------------------
     # 2. Explicit web-search requests
@@ -273,14 +229,6 @@ def search_web(query):
 
     # ------------------------------------------------
     # 4. Internet / meme / trend language
-    #
-    # This catches things like:
-    # "what is 67 meme"
-    # "what does skibidi mean"
-    # "why is ___ trending"
-    #
-    # But DOES NOT trigger on:
-    # "what is a prime number"
     # ------------------------------------------------
 
     internet_context_terms = [
@@ -307,12 +255,7 @@ def search_web(query):
         return True
 
     # ------------------------------------------------
-    # 5. Questions about specific named things.
-    #
-    # Don't blindly search every "what is".
-    #
-    # We only search when the question looks like it
-    # may refer to a proper name / specific entity.
+    # 5. Questions about specific named things
     # ------------------------------------------------
 
     specific_entity_patterns = [
@@ -328,7 +271,6 @@ def search_web(query):
 
     if any(q.startswith(pattern) for pattern in specific_entity_patterns):
 
-        # Common/general concepts that don't need web search.
         obvious_general_topics = [
             "a ",
             "an ",
@@ -353,17 +295,10 @@ def search_web(query):
 
     # ------------------------------------------------
     # 6. "What is X?" special handling
-    #
-    # This is intentionally conservative.
-    #
-    # "What is a prime number?" -> NO SEARCH
-    # "What is photosynthesis?" -> NO SEARCH
-    # "What is Masrah Masr?" -> SEARCH
-    #
-    # We use clues suggesting X is a specific name.
     # ------------------------------------------------
 
     if q.startswith("what is "):
+
         subject = q[8:].strip()
 
         general_words = [
@@ -389,12 +324,9 @@ def search_web(query):
             "a prime",
         ]
 
-        # Explicit internet/meme context already handled above.
         if any(subject.startswith(word) for word in general_words):
             return False
 
-        # Multi-word capitalized names cannot be detected reliably
-        # after lowercasing, so use common entity-like patterns.
         words = subject.split()
 
         if len(words) >= 2:
@@ -402,8 +334,6 @@ def search_web(query):
 
     # ------------------------------------------------
     # 7. Egyptian / Arabizi casual conversation
-    #
-    # Preserve the behavior you already liked.
     # ------------------------------------------------
 
     egyptian_casual_terms = [
@@ -440,17 +370,89 @@ def search_web(query):
         return False
 
     # ------------------------------------------------
-    # 8. Default: don't search.
-    #
-    # Searching should be the exception, not the default.
+    # 8. Default: don't search
     # ------------------------------------------------
 
     return False
 
 
+def search_web(query):
+    """Search the web and return a small set of useful results."""
 
-    
-        
+    if not WEB_SEARCH_AVAILABLE:
+        return []
+
+    try:
+        with DDGS() as ddgs:
+
+            results = list(
+                ddgs.text(
+                    query,
+                    max_results=5
+                )
+            )
+
+        st.write("===== WEB SEARCH RESULTS =====")
+        st.write("QUERY:", query)
+
+        for result in results:
+
+            st.write(
+                "TITLE:",
+                result.get("title", "")
+            )
+
+            st.write(
+                "URL:",
+                result.get("href", "")
+            )
+
+            st.write(
+                "BODY:",
+                result.get("body", "")
+            )
+
+            st.write(
+                "------------------------------"
+            )
+
+        return results
+
+    except Exception as e:
+
+        st.write(
+            "WEB SEARCH ERROR:",
+            e
+        )
+
+        return []
+
+
+def build_web_context(results):
+    """Turn search results into context the AI can understand."""
+
+    if not results:
+        return ""
+
+    context_parts = []
+
+    for result in results:
+
+        title = result.get("title", "")
+        body = result.get("body", "")
+        url = result.get("href", "")
+
+        if title or body:
+
+            context_parts.append(
+                f"Title: {title}\n"
+                f"Summary: {body}\n"
+                f"URL: {url}"
+            )
+
+    return "\n\n".join(context_parts)
+
+
 # ============================================================
 # 4. Streamlit Configuration & Styling
 # ============================================================
@@ -466,7 +468,6 @@ st.markdown(
     """
     <style>
 
-        /* Base page theme */
         .stApp {
             background-color: #1a1a1e !important;
         }
@@ -481,7 +482,6 @@ st.markdown(
             border-right: 1px solid #333;
         }
 
-        /* Universal text */
         [data-testid="stChatMessageContent"],
         [data-testid="stChatMessageContent"] *,
         [data-testid="stMarkdownContainer"],
@@ -490,7 +490,6 @@ st.markdown(
             -webkit-text-fill-color: #ffffff !important;
         }
 
-        /* Code */
         code,
         pre,
         pre * {
@@ -499,7 +498,6 @@ st.markdown(
             background-color: #272822 !important;
         }
 
-        /* Message blocks */
         div[data-testid="stChatMessageUser"] {
             background-color: #27272f !important;
             border-radius: 8px;
@@ -516,7 +514,6 @@ st.markdown(
             padding-bottom: 6rem !important;
         }
 
-        /* Chat input */
         textarea,
         [data-testid="stChatInput"] textarea {
             color: #ffffff !important;
@@ -540,6 +537,7 @@ st.sidebar.markdown(
     "</h2>",
     unsafe_allow_html=True
 )
+
 
 selected_persona = st.sidebar.selectbox(
     "Active Agent:",
@@ -592,6 +590,7 @@ for msg in st.session_state.messages:
             msg["role"],
             avatar=avatar
         ):
+
             st.markdown(
                 msg["content"]
             )
@@ -600,18 +599,29 @@ for msg in st.session_state.messages:
 # ============================================================
 # 8. Chat Input
 # ============================================================
+
 if user_input := st.chat_input(
     f"Message {selected_persona.split()[0]}..."
 ):
 
+    # ------------------------------------------------
     # Display user message
+    # ------------------------------------------------
+
     with st.chat_message(
         "user",
         avatar="👤"
     ):
-        st.markdown(user_input)
 
-    # Save user message in memory
+        st.markdown(
+            user_input
+        )
+
+
+    # ------------------------------------------------
+    # Save user message
+    # ------------------------------------------------
+
     st.session_state.messages.append({
         "role": "user",
         "content": user_input
@@ -623,7 +633,11 @@ if user_input := st.chat_input(
         user_input
     )
 
+
+    # ------------------------------------------------
     # Assistant response
+    # ------------------------------------------------
+
     with st.chat_message(
         "assistant",
         avatar="🤖"
@@ -639,9 +653,10 @@ if user_input := st.chat_input(
                 st.session_state.messages
             )
 
-            # ------------------------------------------------
-            # Selective web search
-            # ------------------------------------------------
+
+            # ====================================================
+            # Selective Web Search
+            # ====================================================
 
             if should_search_web(user_input):
 
@@ -650,42 +665,47 @@ if user_input := st.chat_input(
                     with st.spinner(
                         "Checking the web..."
                     ):
+
                         web_results = search_web(
                             user_input
                         )
+
 
                     web_context = build_web_context(
                         web_results
                     )
 
+
                     if web_context:
 
                         ollama_messages.append({
-    "role": "system",
-    "content": (
-        "Use the following web search results as factual "
-        "supporting context.\n\n"
+                            "role": "system",
+                            "content": (
+                                "Use the following web search results as "
+                                "factual supporting context.\n\n"
 
-        "IMPORTANT GROUNDING RULES:\n"
-        "- Do not invent facts.\n"
-        "- Do not guess specific factual details.\n"
-        "- NEVER invent a URL or website.\n"
-        "- Only provide a URL if that exact URL appears "
-        "in the web search results below.\n"
-        "- NEVER invent phone numbers, addresses, dates, "
-        "statistics, names, or official websites.\n"
-        "- If something cannot be verified from the search "
-        "results, say that it could not be verified.\n"
-        "- Prefer information directly supported by the "
-        "search results.\n"
-        "- If search results disagree, acknowledge the "
-        "uncertainty instead of guessing.\n"
-        "- Answer naturally and directly.\n"
-        "- Do not mention the search process unless useful.\n\n"
+                                "IMPORTANT GROUNDING RULES:\n"
+                                "- Do not invent facts.\n"
+                                "- Do not guess specific factual details.\n"
+                                "- NEVER invent a URL or website.\n"
+                                "- Only provide a URL if that exact URL "
+                                "appears in the web search results below.\n"
+                                "- NEVER invent phone numbers, addresses, "
+                                "dates, statistics, names, or official websites.\n"
+                                "- If something cannot be verified from "
+                                "the search results, say that it could not "
+                                "be verified.\n"
+                                "- Prefer information directly supported "
+                                "by the search results.\n"
+                                "- If search results disagree, acknowledge "
+                                "the uncertainty instead of guessing.\n"
+                                "- Answer naturally and directly.\n"
+                                "- Do not mention the search process unless useful.\n\n"
 
-        + web_context
-    )
-})
+                                + web_context
+                            )
+                        )
+
                 else:
 
                     st.warning(
@@ -693,9 +713,10 @@ if user_input := st.chat_input(
                         "Run `pip install ddgs` to enable it."
                     )
 
-                        # ------------------------------------------------
+
+            # ====================================================
             # Groq
-            # ------------------------------------------------
+            # ====================================================
 
             stream = client.chat.completions.create(
                 model="openai/gpt-oss-20b",
@@ -704,10 +725,17 @@ if user_input := st.chat_input(
                 include_reasoning=False
             )
 
-            # Stream response token-by-token.
+
+            # ------------------------------------------------
+            # Stream response token-by-token
+            # ------------------------------------------------
+
             for chunk in stream:
 
-                content = chunk.choices[0].delta.content or ""
+                content = (
+                    chunk.choices[0].delta.content
+                    or ""
+                )
 
                 full_response += content
 
@@ -715,11 +743,16 @@ if user_input := st.chat_input(
                     full_response + "▊"
                 )
 
+
             response_placeholder.markdown(
                 full_response
             )
 
-            # Save assistant response.
+
+            # ------------------------------------------------
+            # Save assistant response
+            # ------------------------------------------------
+
             st.session_state.messages.append({
                 "role": "assistant",
                 "content": full_response
@@ -729,12 +762,11 @@ if user_input := st.chat_input(
                 selected_persona,
                 "assistant",
                 full_response
-                )
+            )
+
 
         except Exception as e:
 
             st.error(
                 f"Error communicating with the AI: {e}"
             )
-
-
