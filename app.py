@@ -170,14 +170,24 @@ def search_web(query):
 
     try:
         with DDGS() as ddgs:
-            results = ddgs.text(
+            results = list(ddgs.text(
                 query,
                 max_results=5
-            )
+            ))
 
-            return list(results)
+            print("\n===== WEB SEARCH RESULTS =====")
+            print("QUERY:", query)
 
-    except Exception:
+            for result in results:
+                print("TITLE:", result.get("title", ""))
+                print("URL:", result.get("href", ""))
+                print("BODY:", result.get("body", ""))
+                print("------------------------------")
+
+            return results
+
+    except Exception as e:
+        print("WEB SEARCH ERROR:", e)
         return []
 
 
