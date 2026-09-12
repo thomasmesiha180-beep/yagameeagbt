@@ -600,7 +600,6 @@ for msg in st.session_state.messages:
 # ============================================================
 # 8. Chat Input
 # ============================================================
-st.write("SEARCH DECISION:", should_search_web(user_input))
 if user_input := st.chat_input(
     f"Message {selected_persona.split()[0]}..."
 ):
