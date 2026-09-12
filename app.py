@@ -193,7 +193,7 @@ def search_web(query):
     def build_web_context(results):
         """Turn search results into context the AI can understand."""
 
-         if not results:
+        if not results:
             return ""
 
         context_parts = []
