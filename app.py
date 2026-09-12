@@ -392,29 +392,6 @@ def search_web(query):
                 )
             )
 
-        st.write("===== WEB SEARCH RESULTS =====")
-        st.write("QUERY:", query)
-
-        for result in results:
-
-            st.write(
-                "TITLE:",
-                result.get("title", "")
-            )
-
-            st.write(
-                "URL:",
-                result.get("href", "")
-            )
-
-            st.write(
-                "BODY:",
-                result.get("body", "")
-            )
-
-            st.write(
-                "------------------------------"
-            )
 
         return results
 
