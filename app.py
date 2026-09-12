@@ -704,7 +704,7 @@ if user_input := st.chat_input(
 
                                 + web_context
                             )
-                        )
+                        })
 
                 else:
 
