@@ -227,6 +227,7 @@ def build_web_context(results):
         "search for",
         "look online",
         "what does the internet say",
+        "google",
     ]
 
     if any(term in q for term in explicit_search_terms):
