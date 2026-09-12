@@ -134,21 +134,59 @@ try:
 
 except ImportError:
     WEB_SEARCH_AVAILABLE = False
-
-
 def should_search_web(query):
     """
-    Decide whether the user's message likely needs
-    current information from the web.
+    Decide whether a web search is actually useful.
+
+    Search for:
+    - Current / time-sensitive information
+    - Explicit requests to look something up
+    - News, prices, scores, releases, etc.
+    - Specific/obscure entities or internet trends
+    - Questions where the wording strongly suggests online context
+
+    Do NOT search for:
+    - Casual conversation
+    - Normal explanations
+    - Basic math/general knowledge
+    - Egyptian/Arabizi banter
+    - Creative requests
     """
 
     q = query.lower().strip()
 
-    # Don't search incomplete or extremely short messages.
+    # ------------------------------------------------
+    # 1. Very short messages are almost never worth
+    #    sending to the search engine.
+    # ------------------------------------------------
+
     if len(q.split()) < 3:
         return False
 
-    # Strong indicators that the user wants current information.
+    # ------------------------------------------------
+    # 2. Explicit web-search requests
+    # ------------------------------------------------
+
+    explicit_search_terms = [
+        "search the web",
+        "search online",
+        "look it up",
+        "look this up",
+        "google it",
+        "check online",
+        "find online",
+        "search for",
+        "look online",
+        "what does the internet say",
+    ]
+
+    if any(term in q for term in explicit_search_terms):
+        return True
+
+    # ------------------------------------------------
+    # 3. Clearly time-sensitive information
+    # ------------------------------------------------
+
     current_terms = [
         "today",
         "tonight",
@@ -156,75 +194,213 @@ def should_search_web(query):
         "tomorrow",
         "latest",
         "recent",
+        "currently",
         "current",
         "right now",
         "this week",
         "this month",
+        "this year",
         "news",
         "score",
+        "scores",
         "weather",
         "price",
+        "prices",
         "stock",
+        "stocks",
         "release",
+        "released",
         "update",
+        "updates",
         "who won",
         "what happened",
+        "breaking",
+        "live",
     ]
 
-    return any(term in q for term in current_terms)
+    if any(term in q for term in current_terms):
+        return True
+
+    # ------------------------------------------------
+    # 4. Internet / meme / trend language
+    #
+    # This catches things like:
+    # "what is 67 meme"
+    # "what does skibidi mean"
+    # "why is ___ trending"
+    #
+    # But DOES NOT trigger on:
+    # "what is a prime number"
+    # ------------------------------------------------
+
+    internet_context_terms = [
+        "meme",
+        "memes",
+        "trend",
+        "trending",
+        "viral",
+        "internet",
+        "online",
+        "slang",
+        "tiktok",
+        "reddit",
+        "twitter",
+        "x.com",
+        "instagram",
+        "youtube",
+        "meaning in the meme",
+        "meme meaning",
+        "internet meaning",
+    ]
+
+    if any(term in q for term in internet_context_terms):
+        return True
+
+    # ------------------------------------------------
+    # 5. Questions about specific named things.
+    #
+    # Don't blindly search every "what is".
+    #
+    # We only search when the question looks like it
+    # may refer to a proper name / specific entity.
+    # ------------------------------------------------
+
+    specific_entity_patterns = [
+        "who is ",
+        "where is ",
+        "where was ",
+        "where can i find ",
+        "what is the ",
+        "what was the ",
+        "what are the ",
+        "tell me about ",
+    ]
+
+    if any(q.startswith(pattern) for pattern in specific_entity_patterns):
+
+        # Common/general concepts that don't need web search.
+        obvious_general_topics = [
+            "a ",
+            "an ",
+            "the meaning of ",
+            "photosynthesis",
+            "gravity",
+            "relativity",
+            "prime number",
+            "integer",
+            "python",
+            "javascript",
+            "html",
+            "css",
+            "computer",
+            "internet",
+            "machine learning",
+            "artificial intelligence",
+        ]
+
+        if not any(topic in q for topic in obvious_general_topics):
+            return True
+
+    # ------------------------------------------------
+    # 6. "What is X?" special handling
+    #
+    # This is intentionally conservative.
+    #
+    # "What is a prime number?" -> NO SEARCH
+    # "What is photosynthesis?" -> NO SEARCH
+    # "What is Masrah Masr?" -> SEARCH
+    #
+    # We use clues suggesting X is a specific name.
+    # ------------------------------------------------
+
+    if q.startswith("what is "):
+        subject = q[8:].strip()
+
+        general_words = [
+            "a ",
+            "an ",
+            "the meaning",
+            "math",
+            "mathematics",
+            "physics",
+            "science",
+            "gravity",
+            "photosynthesis",
+            "programming",
+            "python",
+            "javascript",
+            "html",
+            "css",
+            "ai",
+            "artificial intelligence",
+            "machine learning",
+            "an integer",
+            "a number",
+            "a prime",
+        ]
+
+        # Explicit internet/meme context already handled above.
+        if any(subject.startswith(word) for word in general_words):
+            return False
+
+        # Multi-word capitalized names cannot be detected reliably
+        # after lowercasing, so use common entity-like patterns.
+        words = subject.split()
+
+        if len(words) >= 2:
+            return True
+
+    # ------------------------------------------------
+    # 7. Egyptian / Arabizi casual conversation
+    #
+    # Preserve the behavior you already liked.
+    # ------------------------------------------------
+
+    egyptian_casual_terms = [
+        "yasta",
+        "ya habibi",
+        "ya bro",
+        "ya gamaa",
+        "gamaa",
+        "3amel",
+        "3amelly",
+        "3ayez",
+        "3ayza",
+        "fein",
+        "fen",
+        "tab",
+        "keda",
+        "kida",
+        "leh",
+        "eih",
+        "eh",
+        "ma3lesh",
+        "mashy",
+        "wallahy",
+        "wallahi",
+        "habibi",
+        "habibti",
+        "ahwa",
+        "madrasa",
+        "gam3a",
+        "gama3a",
+    ]
+
+    if any(term in q for term in egyptian_casual_terms):
+        return False
+
+    # ------------------------------------------------
+    # 8. Default: don't search.
+    #
+    # Searching should be the exception, not the default.
+    # ------------------------------------------------
+
+    return False
 
 
-def search_web(query, max_results=5):
-    """Search the web and return a small set of results."""
 
-    if not WEB_SEARCH_AVAILABLE:
-        return []
-
-    try:
-        with DDGS() as ddgs:
-            results = list(
-                ddgs.text(
-                    query,
-                    max_results=max_results
-                )
-            )
-
-        cleaned = []
-
-        for result in results:
-            title = result.get("title", "").strip()
-            body = result.get("body", "").strip()
-            url = result.get("href", "").strip()
-
-            if title and body:
-                cleaned.append({
-                    "title": title,
-                    "body": body,
-                    "url": url
-                })
-
-        return cleaned
-
-    except Exception:
-        return []
-
-
-def build_web_context(results):
-    """Turn search results into context for the LLM."""
-
-    if not results:
-        return ""
-
-    parts = ["WEB SEARCH RESULTS:\n"]
-
-    for i, result in enumerate(results, 1):
-        parts.append(
-            f"[{i}] {result['title']}\n"
-            f"{result['body']}\n"
-            f"Source: {result['url']}\n"
-        )
-
-    return "\n".join(parts)
+    
+        
 # ============================================================
 # 4. Streamlit Configuration & Styling
 # ============================================================
