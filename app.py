@@ -190,27 +190,27 @@ def search_web(query):
         st.write("WEB SEARCH ERROR:", e)
         return []
 
-def build_web_context(results):
-    """Turn search results into context the AI can understand."""
+    def build_web_context(results):
+        """Turn search results into context the AI can understand."""
 
-    if not results:
-        return ""
+         if not results:
+            return ""
 
-    context_parts = []
+        context_parts = []
 
-    for result in results:
-        title = result.get("title", "")
-        body = result.get("body", "")
-        url = result.get("href", "")
+        for result in results:
+            title = result.get("title", "")
+            body = result.get("body", "")
+            url = result.get("href", "")
 
-        if title or body:
-            context_parts.append(
-                f"Title: {title}\n"
-                f"Summary: {body}\n"
-                f"URL: {url}"
-            )
+            if title or body:
+                context_parts.append(
+                    f"Title: {title}\n"
+                    f"Summary: {body}\n"
+                    f"URL: {url}"
+                )
 
-    return "\n\n".join(context_parts)
+        return "\n\n".join(context_parts)
 
     # ------------------------------------------------
     # 2. Explicit web-search requests
