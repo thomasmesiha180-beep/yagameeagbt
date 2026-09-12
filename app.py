@@ -161,7 +161,47 @@ def should_search_web(query):
     # ------------------------------------------------
 
     if len(q.split()) < 3:
-        return False
+        return False 
+def search_web(query):
+    """Search the web and return a small set of useful results."""
+
+    if not WEB_SEARCH_AVAILABLE:
+        return []
+
+    try:
+        with DDGS() as ddgs:
+            results = ddgs.text(
+                query,
+                max_results=5
+            )
+
+            return list(results)
+
+    except Exception:
+        return []
+
+
+def build_web_context(results):
+    """Turn search results into context the AI can understand."""
+
+    if not results:
+        return ""
+
+    context_parts = []
+
+    for result in results:
+        title = result.get("title", "")
+        body = result.get("body", "")
+        url = result.get("href", "")
+
+        if title or body:
+            context_parts.append(
+                f"Title: {title}\n"
+                f"Summary: {body}\n"
+                f"URL: {url}"
+            )
+
+    return "\n\n".join(context_parts)
 
     # ------------------------------------------------
     # 2. Explicit web-search requests
