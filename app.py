@@ -390,6 +390,10 @@ st.markdown(
     """
     <style>
 
+        /* =========================
+           Base app
+           ========================= */
+
         .stApp {
             background-color: #1a1a1e !important;
         }
@@ -404,6 +408,11 @@ st.markdown(
             border-right: 1px solid #333;
         }
 
+
+        /* =========================
+           Chat text
+           ========================= */
+
         [data-testid="stChatMessageContent"],
         [data-testid="stChatMessageContent"] *,
         [data-testid="stMarkdownContainer"],
@@ -412,6 +421,11 @@ st.markdown(
             -webkit-text-fill-color: #ffffff !important;
         }
 
+
+        /* =========================
+           Code blocks
+           ========================= */
+
         code,
         pre,
         pre * {
@@ -419,6 +433,11 @@ st.markdown(
             -webkit-text-fill-color: #a6e22e !important;
             background-color: #272822 !important;
         }
+
+
+        /* =========================
+           Chat bubbles
+           ========================= */
 
         div[data-testid="stChatMessageUser"] {
             background-color: #27272f !important;
@@ -430,17 +449,87 @@ st.markdown(
             border-radius: 8px;
         }
 
+
+        /* =========================
+           Desktop layout
+           ========================= */
+
         .block-container {
             max-width: 850px !important;
             padding-top: 2rem !important;
             padding-bottom: 6rem !important;
         }
 
+
+        /* =========================
+           Chat input
+           ========================= */
+
         textarea,
         [data-testid="stChatInput"] textarea {
             color: #ffffff !important;
             background-color: #2e2f38 !important;
             -webkit-text-fill-color: #ffffff !important;
+        }
+
+
+        /* =========================
+           MOBILE
+           ========================= */
+
+        @media (max-width: 768px) {
+
+            .block-container {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+                padding-top: 1rem !important;
+                padding-bottom: 5rem !important;
+            }
+
+            [data-testid="stChatMessage"] {
+                padding-left: 0.25rem !important;
+                padding-right: 0.25rem !important;
+            }
+
+            [data-testid="stChatMessageContent"] {
+                max-width: 100% !important;
+                width: 100% !important;
+                overflow-wrap: anywhere !important;
+                word-break: break-word !important;
+            }
+
+            [data-testid="stChatInput"] {
+                width: 100% !important;
+            }
+
+            [data-testid="stChatInput"] textarea {
+                font-size: 16px !important;
+            }
+
+            [data-testid="stSidebar"] {
+                width: 80vw !important;
+                max-width: 320px !important;
+            }
+        }
+
+
+        /* =========================
+           VERY SMALL PHONES
+           ========================= */
+
+        @media (max-width: 400px) {
+
+            .block-container {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+            }
+
+            [data-testid="stChatMessageContent"] {
+                font-size: 0.95rem !important;
+            }
+
         }
 
     </style>
