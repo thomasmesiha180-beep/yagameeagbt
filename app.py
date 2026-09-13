@@ -1,5 +1,3 @@
-import json
-import os
 import re
 
 from groq import Groq
@@ -8,59 +6,6 @@ import streamlit as st
 client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 
-# ============================================================
-# 1. Persistent Chat History
-# ============================================================
-
-HISTORY_FILE = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)),
-    "chat_history.json"
-)
-
-
-def load_all_history():
-    if not os.path.exists(HISTORY_FILE):
-        return {}
-
-    try:
-        with open(HISTORY_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            return data if isinstance(data, dict) else {}
-    except (json.JSONDecodeError, OSError):
-        return {}
-
-
-def save_all_history(history):
-    with open(HISTORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(history, f, ensure_ascii=False, indent=2)
-
-
-def load_history_for_persona(persona):
-    data = load_all_history()
-    messages = data.get(persona, [])
-
-    if not isinstance(messages, list):
-        return []
-
-    return [
-        {"role": m["role"], "content": m["content"]}
-        for m in messages
-        if isinstance(m, dict)
-        and m.get("role") in ("user", "assistant")
-        and isinstance(m.get("content"), str)
-    ]
-
-
-def save_message(persona, role, message):
-    data = load_all_history()
-    data.setdefault(persona, [])
-
-    data[persona].append({
-        "role": role,
-        "content": message
-    })
-
-    save_all_history(data)
 
 
 # ============================================================
@@ -75,7 +20,7 @@ PERSONAS = {
         "Always deliver direct, well-structured, and deeply informative responses."
     ),
 
-    "YaGammeGBT 🇪🇬": (
+    "YaGammeaGBT 🇪🇬": (
         "You are YaGammeaGBT, a hilarious, quick-witted Egyptian jokester "
         "and street-smart AI comedian. Your MAIN PRIORITY is to entertain "
         "the user with Egyptian humor, sarcasm, playful banter, and funny "
@@ -523,19 +468,14 @@ selected_persona = st.sidebar.selectbox(
 
 
 # ============================================================
-# 6. Load Persona History
+# 6. Session Chat History
 # ============================================================
 
 if (
     "current_persona" not in st.session_state
     or st.session_state.current_persona != selected_persona
 ):
-
     st.session_state.current_persona = selected_persona
-
-    past_history = load_history_for_persona(
-        selected_persona
-    )
 
     st.session_state.messages = [
         {
@@ -543,11 +483,6 @@ if (
             "content": PERSONAS[selected_persona]
         }
     ]
-
-    st.session_state.messages.extend(
-        past_history
-    )
-
 
 # ============================================================
 # 7. Display Chat History
@@ -604,12 +539,7 @@ if user_input := st.chat_input(
         "content": user_input
     })
 
-    save_message(
-        selected_persona,
-        "user",
-        user_input
-    )
-
+    
 
     # ------------------------------------------------
     # Assistant response
@@ -735,12 +665,7 @@ if user_input := st.chat_input(
                 "content": full_response
             })
 
-            save_message(
-                selected_persona,
-                "assistant",
-                full_response
-            )
-
+            
 
         except Exception as e:
 
