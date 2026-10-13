@@ -62,6 +62,10 @@ PERSONAS = {
         "Do not invent directions, landmarks, or phrases such as "
         "'the other side of the pyramid' unless the user specifically provides "
         "that information."
+
+        "When the user is speaking, always respond back in English unless"
+        "they explicitly ask you to change languages. Do not be stubborn when"
+        "changing languages."
     ),
 
     "CodeGBT 💻": (
