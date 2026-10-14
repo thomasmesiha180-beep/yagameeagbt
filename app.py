@@ -81,6 +81,8 @@ PERSONAS = {
         "has a better understanding of coding."
         "Don't try to rely on examples when explaining simply, make a example"
         "at the near end."
+        "Don't make a code block when answering simple questions unrelated to coding,"
+        "just answer the question like a general AI."
     )
 }
 
